@@ -2,48 +2,67 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Pick your location</title>
+  <title>Survey + Map</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    html, body, #map { height: 100%; margin: 0; padding: 0; }
-    #info {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: white;
-      padding: 8px 12px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      font-family: sans-serif;
-      z-index: 1000;
+    html, body { height: 100%; margin: 0; font-family: sans-serif; }
+    #tripettoFrame { width: 100%; height: 100%; border: 0; }
+    #mapOverlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none; align-items: center; justify-content: center;
+      z-index: 10;
+    }
+    #mapBox {
+      background: white; width: 90%; height: 80%;
+      border-radius: 10px; overflow: hidden; position: relative;
+    }
+    #map { width: 100%; height: 100%; }
+    #closeMap {
+      position: absolute; top: 10px; right: 10px;
+      background: #fff; border: 1px solid #ccc;
+      padding: 4px 10px; border-radius: 6px; cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div id="info">Click your location on the map.</div>
-  <div id="map"></div>
+  <!-- Tripetto form embedded -->
+  <iframe id="tripettoFrame" src="https://tripetto.app/run/5K4PTLSPST"></iframe>
+
+  <!-- Map overlay -->
+  <div id="mapOverlay">
+    <div id="mapBox">
+      <button id="closeMap">× Close</button>
+      <div id="map"></div>
+    </div>
+  </div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    // 👇 Replace this with your Tripetto form URL:
-    const tripettoFormUrl = "https://tripetto.app/run/5K4PTLSPST";
+    const iframe = document.getElementById('tripettoFrame');
+    const mapOverlay = document.getElementById('mapOverlay');
+    const closeMap = document.getElementById('closeMap');
 
-    const map = L.map('map').setView([35.9, 14.5], 9); // centered on Malta
+    // Example: listen for a trigger from inside Tripetto (simplest way: user clicks a button labeled "Open map")
+    window.openMap = () => mapOverlay.style.display = 'flex';
+    closeMap.onclick = () => mapOverlay.style.display = 'none';
+
+    const map = L.map('map').setView([35.9,14.5],9);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
     let marker;
-    map.on('click', function(e) {
+    map.on('click', e => {
       if (marker) map.removeLayer(marker);
       marker = L.marker(e.latlng).addTo(map);
-
       const lat = e.latlng.lat.toFixed(6);
       const lng = e.latlng.lng.toFixed(6);
-      const confirmMsg = `Use this location?\nLatitude: ${lat}\nLongitude: ${lng}`;
-      if (confirm(confirmMsg)) {
-        window.location.href = `${tripettoFormUrl}?lat=${lat}&lng=${lng}`;
+      if (confirm(`Use this location?\n${lat}, ${lng}`)) {
+        // reload Tripetto iframe with coordinates (hidden fields will capture them)
+        iframe.src = `https://tripetto.app/run/5K4PTLSPST?lat=${lat}&lng=${lng}`;
+        mapOverlay.style.display = 'none';
       }
     });
   </script>
