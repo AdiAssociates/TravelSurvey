@@ -26,7 +26,7 @@
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const map = L.map('map').setView([35.9, 14.5], 9); // centered on Malta
+    const map = L.map('map').setView([35.9, 14.5], 9);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
@@ -35,15 +35,10 @@
     map.on('click', function(e) {
       if (marker) map.removeLayer(marker);
       marker = L.marker(e.latlng).addTo(map);
-
       const lat = e.latlng.lat.toFixed(6);
       const lng = e.latlng.lng.toFixed(6);
-      const confirmMsg = `Use this location?\nLatitude: ${lat}\nLongitude: ${lng}`;
-      if (confirm(confirmMsg)) {
-        // Send lat/lng back to parent page
-        if (window.opener) {
-          window.opener.postMessage({ lat, lng }, "*");
-        }
+      if (confirm(`Use this location?\nLatitude: ${lat}\nLongitude: ${lng}`)) {
+        window.opener?.postMessage({ lat, lng }, "*");
         window.close();
       }
     });
