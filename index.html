@@ -2,49 +2,51 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Pick your location</title>
+  <title>Survey + Map Picker</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    html, body, #map { height: 100%; margin: 0; padding: 0; }
-    #info {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: white;
-      padding: 8px 12px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    html, body {
+      height: 100%;
+      margin: 0;
       font-family: sans-serif;
-      z-index: 1000;
+    }
+    #tripettoFrame {
+      width: 100%;
+      height: 100%;
+      border: none;
     }
   </style>
 </head>
 <body>
-  <div id="info">Click your location on the map.</div>
-  <div id="map"></div>
+  <!-- 👇 Tripetto form embedded in an iframe -->
+  <iframe id="tripettoFrame" src="https://tripetto.app/run/5K4PTLSPST"></iframe>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const map = L.map('map').setView([35.9, 14.5], 9);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    // Listen for message events from the map popup
+    window.addEventListener("message", event => {
+      if (event.data && event.data.lat && event.data.lng) {
+        const { lat, lng } = event.data;
+        console.log("Received coordinates:", lat, lng);
 
-    let marker;
-    map.on('click', e => {
-      if (marker) map.removeLayer(marker);
-      marker = L.marker(e.latlng).addTo(map);
-
-      const lat = e.latlng.lat.toFixed(6);
-      const lng = e.latlng.lng.toFixed(6);
-
-      if (confirm(`Use this location?\nLatitude: ${lat}\nLongitude: ${lng}`)) {
-        // Send lat/lng to parent window (Tripetto host)
-        window.opener?.postMessage({ lat, lng }, "*");
-        window.close(); // close popup
+        // Reload Tripetto form with new lat/lng params
+        const tripettoFormUrl = "https://tripetto.app/run/5K4PTLSPST";
+        const iframe = document.getElementById("tripettoFrame");
+        iframe.src = `${tripettoFormUrl}?lat=${lat}&lng=${lng}`;
       }
     });
+
+    // Optional helper: open map popup (you can trigger this from a Tripetto button)
+    window.openMapPopup = () => {
+      const width = 600;
+      const height = 500;
+      const left = (screen.width - width) / 2;
+      const top = (screen.height - height) / 2;
+      window.open(
+        "map.html", // 👈 Separate file that holds the map picker
+        "MapPicker",
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
+    };
   </script>
 </body>
 </html>
