@@ -2,115 +2,49 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Home Location Survey</title>
+  <title>Pick your location</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: sans-serif;
-      background: #f5f5f5;
-    }
-    h1 {
-      text-align: center;
-      padding: 1em 0 0.3em;
-      margin: 0;
-    }
-    #tripettoFrame {
-      width: 100%;
-      height: calc(100vh - 100px);
-      border: 0;
-      display: block;
-    }
-    #mapOverlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-    }
-    #mapBox {
-      background: white;
-      width: 90%;
-      height: 80%;
-      border-radius: 10px;
-      overflow: hidden;
-      position: relative;
-    }
-    #map { width: 100%; height: 100%; }
-    #closeMap {
+    html, body, #map { height: 100%; margin: 0; padding: 0; }
+    #info {
       position: absolute;
       top: 10px;
-      right: 10px;
-      background: #fff;
-      border: 1px solid #ccc;
-      padding: 4px 10px;
-      border-radius: 6px;
-      cursor: pointer;
+      left: 10px;
+      background: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      font-family: sans-serif;
+      z-index: 1000;
     }
   </style>
 </head>
 <body>
-  <h1>Home Location Survey</h1>
-
-  <iframe id="tripettoFrame" src="https://tripetto.app/run/5K4PTLSPST"></iframe>
-
-  <div id="mapOverlay">
-    <div id="mapBox">
-      <button id="closeMap">× Close</button>
-      <div id="map"></div>
-    </div>
-  </div>
+  <div id="info">Click your location on the map.</div>
+  <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const tripettoUrl = "https://tripetto.app/run/5K4PTLSPST";
-    const iframe = document.getElementById("tripettoFrame");
-    const overlay = document.getElementById("mapOverlay");
-    const closeBtn = document.getElementById("closeMap");
+    // 👇 Replace this with your Tripetto form URL:
+    const tripettoFormUrl = "https://tripetto.app/run/5K4PTLSPST";
 
-    // Create map
-    const map = L.map("map").setView([35.9, 14.5], 9);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap contributors"
+    const map = L.map('map').setView([35.9, 14.5], 9); // centered on Malta
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
     let marker;
-
-    // When the map is clicked
-    map.on("click", e => {
+    map.on('click', function(e) {
       if (marker) map.removeLayer(marker);
       marker = L.marker(e.latlng).addTo(map);
 
       const lat = e.latlng.lat.toFixed(6);
       const lng = e.latlng.lng.toFixed(6);
-
-      if (confirm(`Use this location?\nLatitude: ${lat}\nLongitude: ${lng}`)) {
-        iframe.src = `${tripettoUrl}?lat=${lat}&lng=${lng}`;
-        overlay.style.display = "none";
+      const confirmMsg = `Use this location?\nLatitude: ${lat}\nLongitude: ${lng}`;
+      if (confirm(confirmMsg)) {
+        window.location.href = `${tripettoFormUrl}?lat=${lat}&lng=${lng}`;
       }
-    });
-
-    // Close map button
-    closeBtn.onclick = () => overlay.style.display = "none";
-
-    // 👇 Detect when Tripetto navigates to "Primary residence" question
-    iframe.addEventListener("load", () => {
-      const checkInterval = setInterval(() => {
-        try {
-          const innerDoc = iframe.contentWindow.document;
-          const questionTitle = innerDoc.querySelector("h1, h2, label");
-          if (questionTitle && questionTitle.innerText.includes("Primary residence")) {
-            overlay.style.display = "flex"; // open map automatically
-            clearInterval(checkInterval);
-          }
-        } catch (e) {
-          // ignore cross-origin errors
-        }
-      }, 1500);
     });
   </script>
 </body>
