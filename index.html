@@ -2,51 +2,72 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Survey + Map Picker</title>
+  <title>Travel Survey + Map</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
     html, body {
       height: 100%;
       margin: 0;
       font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 10px;
+      background: #f0f0f0;
+      text-align: center;
     }
     #tripettoFrame {
+      flex: 1;
       width: 100%;
-      height: 100%;
-      border: none;
+      border: 0;
+    }
+    button {
+      padding: 10px 16px;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: #0078d7;
+      color: white;
     }
   </style>
 </head>
 <body>
-  <!-- 👇 Tripetto form embedded in an iframe -->
+  <header>
+    <h2>Home Location Survey</h2>
+    <p>Step 1: Click below to choose your home location.</p>
+    <button id="openMap">🗺️ Pick on Map</button>
+  </header>
+
+  <!-- Tripetto form -->
   <iframe id="tripettoFrame" src="https://tripetto.app/run/5K4PTLSPST"></iframe>
 
   <script>
-    // Listen for message events from the map popup
-    window.addEventListener("message", event => {
-      if (event.data && event.data.lat && event.data.lng) {
-        const { lat, lng } = event.data;
-        console.log("Received coordinates:", lat, lng);
+    const tripettoFormUrl = "https://tripetto.app/run/5K4PTLSPST";
+    const iframe = document.getElementById("tripettoFrame");
 
-        // Reload Tripetto form with new lat/lng params
-        const tripettoFormUrl = "https://tripetto.app/run/5K4PTLSPST";
-        const iframe = document.getElementById("tripettoFrame");
-        iframe.src = `${tripettoFormUrl}?lat=${lat}&lng=${lng}`;
-      }
-    });
-
-    // Optional helper: open map popup (you can trigger this from a Tripetto button)
-    window.openMapPopup = () => {
+    // Open popup map
+    document.getElementById("openMap").addEventListener("click", () => {
       const width = 600;
       const height = 500;
       const left = (screen.width - width) / 2;
       const top = (screen.height - height) / 2;
       window.open(
-        "map.html", // 👈 Separate file that holds the map picker
+        "map.html",
         "MapPicker",
         `width=${width},height=${height},left=${left},top=${top}`
       );
-    };
+    });
+
+    // Receive lat/lng from popup
+    window.addEventListener("message", event => {
+      if (event.data && event.data.lat && event.data.lng) {
+        const { lat, lng } = event.data;
+        console.log("Coordinates received:", lat, lng);
+        iframe.src = `${tripettoFormUrl}?lat=${lat}&lng=${lng}`;
+      }
+    });
   </script>
 </body>
 </html>
