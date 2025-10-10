@@ -27,10 +27,8 @@
   </style>
 </head>
 <body>
-  <!-- Tripetto form embedded -->
   <iframe id="tripettoFrame" src="https://tripetto.app/run/5K4PTLSPST"></iframe>
 
-  <!-- Map overlay -->
   <div id="mapOverlay">
     <div id="mapBox">
       <button id="closeMap">× Close</button>
@@ -40,12 +38,22 @@
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
+    const tripettoBase = "https://tripetto.app/run/5K4PTLSPST";
     const iframe = document.getElementById('tripettoFrame');
     const mapOverlay = document.getElementById('mapOverlay');
     const closeMap = document.getElementById('closeMap');
 
-    // Example: listen for a trigger from inside Tripetto (simplest way: user clicks a button labeled "Open map")
-    window.openMap = () => mapOverlay.style.display = 'flex';
+    // --- Detect ?openmap=true ---
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("openmap") === "true") {
+      openMap();
+      // remove query param so refresh won't reopen map
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    function openMap() {
+      mapOverlay.style.display = 'flex';
+    }
     closeMap.onclick = () => mapOverlay.style.display = 'none';
 
     const map = L.map('map').setView([35.9,14.5],9);
@@ -60,8 +68,7 @@
       const lat = e.latlng.lat.toFixed(6);
       const lng = e.latlng.lng.toFixed(6);
       if (confirm(`Use this location?\n${lat}, ${lng}`)) {
-        // reload Tripetto iframe with coordinates (hidden fields will capture them)
-        iframe.src = `https://tripetto.app/run/5K4PTLSPST?lat=${lat}&lng=${lng}`;
+        iframe.src = `${tripettoBase}?lat=${lat}&lng=${lng}`;
         mapOverlay.style.display = 'none';
       }
     });
