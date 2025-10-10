@@ -68,6 +68,14 @@
         iframe.src = `${tripettoFormUrl}?lat=${lat}&lng=${lng}`;
       }
     });
+
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        window.openMapPopup();
+      }, 1000); // wait 1 s after load
+    });
+
   </script>
 </body>
 </html>
+
