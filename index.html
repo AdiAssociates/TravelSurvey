@@ -2,80 +2,116 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Travel Survey + Map</title>
+  <title>Home Location Survey</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     html, body {
       height: 100%;
       margin: 0;
       font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
+      background: #f5f5f5;
     }
-    header {
-      padding: 10px;
-      background: #f0f0f0;
+    h1 {
       text-align: center;
+      padding: 1em 0 0.3em;
+      margin: 0;
     }
     #tripettoFrame {
-      flex: 1;
       width: 100%;
+      height: calc(100vh - 100px);
       border: 0;
+      display: block;
     }
-    button {
-      padding: 10px 16px;
-      font-size: 1rem;
-      cursor: pointer;
-      border-radius: 6px;
+    #mapOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+    #mapBox {
+      background: white;
+      width: 90%;
+      height: 80%;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+    #map { width: 100%; height: 100%; }
+    #closeMap {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #fff;
       border: 1px solid #ccc;
-      background: #0078d7;
-      color: white;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h2>Home Location Survey</h2>
-    <p>Step 1: Click below to choose your home location.</p>
-    <button id="openMap">🗺️ Pick on Map</button>
-  </header>
+  <h1>Home Location Survey</h1>
 
-  <!-- Tripetto form -->
   <iframe id="tripettoFrame" src="https://tripetto.app/run/5K4PTLSPST"></iframe>
 
+  <div id="mapOverlay">
+    <div id="mapBox">
+      <button id="closeMap">× Close</button>
+      <div id="map"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const tripettoFormUrl = "https://tripetto.app/run/5K4PTLSPST";
+    const tripettoUrl = "https://tripetto.app/run/5K4PTLSPST";
     const iframe = document.getElementById("tripettoFrame");
+    const overlay = document.getElementById("mapOverlay");
+    const closeBtn = document.getElementById("closeMap");
 
-    // Open popup map
-    document.getElementById("openMap").addEventListener("click", () => {
-      const width = 600;
-      const height = 500;
-      const left = (screen.width - width) / 2;
-      const top = (screen.height - height) / 2;
-      window.open(
-        "map.html",
-        "MapPicker",
-        `width=${width},height=${height},left=${left},top=${top}`
-      );
-    });
+    // Create map
+    const map = L.map("map").setView([35.9, 14.5], 9);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors"
+    }).addTo(map);
 
-    // Receive lat/lng from popup
-    window.addEventListener("message", event => {
-      if (event.data && event.data.lat && event.data.lng) {
-        const { lat, lng } = event.data;
-        console.log("Coordinates received:", lat, lng);
-        iframe.src = `${tripettoFormUrl}?lat=${lat}&lng=${lng}`;
+    let marker;
+
+    // When the map is clicked
+    map.on("click", e => {
+      if (marker) map.removeLayer(marker);
+      marker = L.marker(e.latlng).addTo(map);
+
+      const lat = e.latlng.lat.toFixed(6);
+      const lng = e.latlng.lng.toFixed(6);
+
+      if (confirm(`Use this location?\nLatitude: ${lat}\nLongitude: ${lng}`)) {
+        iframe.src = `${tripettoUrl}?lat=${lat}&lng=${lng}`;
+        overlay.style.display = "none";
       }
     });
 
-    window.addEventListener("load", () => {
-      setTimeout(() => {
-        window.openMapPopup();
-      }, 1000); // wait 1 s after load
-    });
+    // Close map button
+    closeBtn.onclick = () => overlay.style.display = "none";
 
+    // 👇 Detect when Tripetto navigates to "Primary residence" question
+    iframe.addEventListener("load", () => {
+      const checkInterval = setInterval(() => {
+        try {
+          const innerDoc = iframe.contentWindow.document;
+          const questionTitle = innerDoc.querySelector("h1, h2, label");
+          if (questionTitle && questionTitle.innerText.includes("Primary residence")) {
+            overlay.style.display = "flex"; // open map automatically
+            clearInterval(checkInterval);
+          }
+        } catch (e) {
+          // ignore cross-origin errors
+        }
+      }, 1500);
+    });
   </script>
 </body>
 </html>
-
