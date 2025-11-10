@@ -94,8 +94,8 @@
         weight: 0
       }).addTo(map);
 
-      const lat2 = e.latlng.lat.toFixed(6);
-      const lng2 = e.latlng.lng.toFixed(6);
+      const lat = e.latlng.lat.toFixed(6);
+      const lng = e.latlng.lng.toFixed(6);
 
       const popupContent = `
         <div class="popup-content">
@@ -108,7 +108,7 @@
       marker.bindPopup(popupContent).openPopup();
     });
 
-    function confirmLocation(lat2, lng2) {
+    function confirmLocation(lat, lng) {
       window.location.href = `${tripettoFormUrl}?lat2=${lat}&lng2=${lng}`;
     }
 </script>
@@ -118,5 +118,6 @@
 
 </body>
 </html>
+
 
 
