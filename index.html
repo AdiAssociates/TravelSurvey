@@ -27,8 +27,10 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
     const tripettoFormUrl = "https://tripetto.app/run/UG2G4TRJ40";
-
+    const logoUrl = "Adi white2.png";
     const map = L.map('map').setView([35.9, 14.5], 9); // centered on Malta
+    
+    
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
@@ -40,11 +42,19 @@
 
       const lat = e.latlng.lat.toFixed(6);
       const lng = e.latlng.lng.toFixed(6);
-      const confirmMsg = `Use this location?\nLatitude: ${lat}\nLongitude: ${lng}`;
-      if (confirm(confirmMsg)) {
-        window.location.href = `${tripettoFormUrl}?lat=${lat}&lng=${lng}`;
-      }
+      const popupContent = `
+        <div class="popup-content">
+          <img src="${logoUrl}" alt="Logo">
+          <p>Use this location?</p>
+          <button class="popup-button" onclick="confirmLocation(${lat}, ${lng})">Confirm</button>
+        </div>
+      `;
+      marker.bindPopup(popupContent).openPopup();
     });
+
+    function confirmLocation(lat, lng) {
+      window.location.href = `${tripettoFormUrl}?lat=${lat}&lng=${lng}`;
+    }
   </script>
 </body>
 </html>
