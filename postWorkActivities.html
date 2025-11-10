@@ -94,14 +94,14 @@
         weight: 0
       }).addTo(map);
 
-      const lat2 = e.latlng.lat2.toFixed(6);
-      const lng2 = e.latlng.lng2.toFixed(6);
+      const lat2 = e.latlng.lat.toFixed(6);
+      const lng2 = e.latlng.lng.toFixed(6);
 
       const popupContent = `
         <div class="popup-content">
           <img src="${logoUrl}" alt="Logo">
           <p>Approximate area of most frequent post-work activity</p>
-          <button class="popup-button" onclick="confirmLocation(${lat2}, ${lng2})">Confirm</button>
+          <button class="popup-button" onclick="confirmLocation(${lat}, ${lng})">Confirm</button>
         </div>
       `;
 
@@ -109,7 +109,7 @@
     });
 
     function confirmLocation(lat2, lng2) {
-      window.location.href = `${tripettoFormUrl}?lat=${lat2}&lng=${lng2}`;
+      window.location.href = `${tripettoFormUrl}?lat2=${lat}&lng2=${lng}`;
     }
 </script>
 
@@ -118,4 +118,5 @@
 
 </body>
 </html>
+
 
