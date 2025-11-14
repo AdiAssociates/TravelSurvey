@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Pick your location</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    html, body, #map { height: 100%; margin: 0; padding: 0; }
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      font-family: sans-serif;
+      z-index: 1000;
+    }
+
+
+    .popup-content {
+      text-align: center;
+      max-width: 180px;
+    }
+    .popup-content img {
+      width: 35px;
+      max-width: 100%;
+      height: auto;
+    }
+    .popup-content p {
+      margin: 6px 0;
+      font-size: 14px;
+    }
+    .popup-button {
+      margin-top: 6px;
+      padding: 6px 12px;
+      border: none;
+      background: #f28c00;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .popup-button:hover {
+      background: #000;
+    }
+
+    .small-logos {
+      margin-top: 8px;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+    .small-logos img {
+      width: 28px;
+      height: auto;
+    }
+
+
+  </style>
+</head>
+<body>
+  <div id="info">Click your location on the map.</div>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const tripettoFormUrl = "https://tripetto.app/run/UG2G4TRJ40";
+    const logoUrl = "assets/home.png";
+    const map = L.map('map').setView([35.9, 14.5], 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    let marker, shadow;
+
+    map.on('click', function(e) {
+      // Remove previous marker and shadow
+      if (marker) map.removeLayer(marker);
+      if (shadow) map.removeLayer(shadow);
+
+      // Add the default marker
+      marker = L.marker(e.latlng).addTo(map);
+
+      // Add a circular shadow beneath
+      shadow = L.circleMarker(e.latlng, {
+        radius: 35,               // size of the shadow
+        color: 'transparent',     // no border
+        fillColor: 'black',       // shadow color
+        fillOpacity: 0.25,        // transparency
+        weight: 0
+      }).addTo(map);
+
+      const lat = e.latlng.lat.toFixed(6);
+      const lng = e.latlng.lng.toFixed(6);
+
+      const popupContent = `
+        <div class="popup-content">
+          <img src="${logoUrl}" alt="Logo">
+          <p>Approximate home location</p>
+          <button class="popup-button" onclick="confirmLocation(${lat}, ${lng})">Confirm</button>
+        </div>
+      `;
+
+      marker.bindPopup(popupContent).openPopup();
+    });
+
+    function confirmLocation(lat, lng) {
+      window.location.href = `${tripettoFormUrl}?lat=${lat}&lng=${lng}`;
+    }
+</script>
+
+
+
+
+</body>
+</html>
+
