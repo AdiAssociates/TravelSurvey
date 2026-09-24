@@ -67,7 +67,7 @@
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const tripettoFormUrl = "https://tripetto.app/run/BCZ6T0DBOZ";
+    const tripettoFormUrl = "https://www.adi-associates.com/?tripetto=926b51f7fdb20a029d74b54a869948e4dde6917ef7a34008acbb17eef48e1329";
     const logoUrl = "assets/home.png";
     const map = L.map('map').setView([35.9, 14.5], 12);
 
@@ -109,7 +109,7 @@
     });
 
     function confirmLocation(lat, lng) {
-      window.location.href = `${tripettoFormUrl}?lat=${lat}&lng=${lng}`;
+      window.location.href = `${tripettoFormUrl}$lat=${lat}&lng=${lng}`;
     }
 </script>
 
